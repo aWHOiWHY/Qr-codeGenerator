@@ -3,136 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Генератор QR-кода</title>
+    <title>Генератор QR-кодов | Быстро и бесплатно</title>
+    <meta name="description" content="Создайте QR-код для любой ссылки бесплатно. Скачивайте, копируйте, делитесь.">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #0d6efd;
+            --success: #198754;
+            --warning: #ffc107;
+        }
+        
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+        
         .container {
             text-align: center;
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: containerAppear 0.5s ease;
         }
+        
+        @keyframes containerAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h4 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        #linkInput {
+            border-radius: 10px 0 0 10px;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-right: none;
+            transition: all 0.3s ease;
+        }
+        
+        #linkInput:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+            outline: none;
+        }
+        
+        .paste-btn {
+            border-radius: 0 10px 10px 0;
+            border: 2px solid #e0e0e0;
+            border-left: none;
+            background: white;
+        }
+        
+        .paste-btn:hover {
+            background: #f8f9fa;
+            border-color: #ced4da;
+        }
+        
         #qrcode {
-            width: 200px;
-            height: 200px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            margin: 20px auto;
+            width: 220px;
+            height: 220px;
+            border: 3px solid #f0f0f0;
+            border-radius: 12px;
+            margin: 25px auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: white;
+            background: white;
             overflow: hidden;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="white"/><text x="100" y="100" font-family="Arial" font-size="14" fill="%23ccc" text-anchor="middle" dominant-baseline="middle">QR-код появится здесь</text></svg>');
-            background-repeat: no-repeat;
-            background-position: center;
+            position: relative;
+            transition: all 0.3s ease;
         }
+        
+        #qrcode:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
         #qrcode img {
             max-width: 100%;
             max-height: 100%;
+            animation: qrAppear 0.5s ease;
         }
+        
+        @keyframes qrAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
         .buttons-container {
             display: flex;
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 25px;
             justify-content: center;
             flex-wrap: wrap;
         }
+        
         .action-btn {
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             flex: 1;
-            min-width: 140px;
+            min-width: 160px;
+            position: relative;
+            overflow: hidden;
         }
+        
         .download-btn {
-            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            background: linear-gradient(135deg, var(--primary), #0a58ca);
             color: white;
         }
+        
         .download-btn:not(:disabled):hover {
             background: linear-gradient(135deg, #0a58ca, #084298);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
         }
-        .copy-btn {
-            background: linear-gradient(135deg, #198754, #157347);
-            color: white;
-        }
-        .copy-btn:not(:disabled):hover {
-            background: linear-gradient(135deg, #157347, #146c43);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
-        }
+        
         .share-btn {
-            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            background: linear-gradient(135deg, var(--success), #157347);
             color: white;
         }
+        
         .share-btn:not(:disabled):hover {
-            background: linear-gradient(135deg, #fd7e14, #e8590c);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+            background: linear-gradient(135deg, #157347, #146c43);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(25, 135, 84, 0.4);
         }
+        
         .action-btn:disabled {
-            background: #6c757d !important;
-            opacity: 0.6;
+            background: #adb5bd !important;
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
             box-shadow: none !important;
         }
-        .mobile-warning {
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+        
+        .stat-label {
             font-size: 12px;
-            color: #fd7e14;
+            color: #888;
             margin-top: 5px;
-            display: none;
         }
-        .mobile-warning.show {
-            display: block;
-        }
+        
         .footer {
             margin-top: 20px;
             font-size: 14px;
-            color: gray;
+            color: #888;
+            text-align: center;
         }
-        .alert-message {
+        
+        /* Toast уведомления */
+        .toast {
             position: fixed;
             top: 20px;
             right: 20px;
             padding: 12px 20px;
-            background: #198754;
+            border-radius: 10px;
             color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: none;
-            z-index: 2000;
-            animation: slideIn 0.3s ease;
+            z-index: 10000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: toastSlideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 300px;
         }
-        .alert-message.error {
+        
+        .toast.success {
+            background: var(--success);
+        }
+        
+        .toast.error {
             background: #dc3545;
         }
-        .alert-message.warning {
-            background: #fd7e14;
+        
+        .toast.warning {
+            background: var(--warning);
+            color: #000;
         }
-        @keyframes slideIn {
+        
+        .toast.info {
+            background: var(--primary);
+        }
+        
+        @keyframes toastSlideIn {
             from {
                 transform: translateX(100%);
                 opacity: 0;
@@ -142,17 +262,73 @@
                 opacity: 1;
             }
         }
+        
+        @keyframes toastSlideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Стили для спиннера загрузки */
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
             }
-            .action-btn {
-                min-width: 120px;
-                padding: 10px 15px;
-                font-size: 14px;
-            }
             .buttons-container {
                 flex-direction: column;
+            }
+            .action-btn {
+                width: 100%;
+                min-width: auto;
+            }
+            .toast {
+                left: 20px;
+                right: 20px;
+                text-align: center;
+                justify-content: center;
+                max-width: none;
+            }
+            @keyframes toastSlideIn {
+                from {
+                    transform: translateY(-100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes toastSlideOut {
+                from {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateY(-100%);
+                    opacity: 0;
+                }
             }
         }
     </style>
@@ -160,226 +336,398 @@
 <body>
 
 <div class="container">
-    <h4 class="mb-3">Введите ссылку, чтобы получить QR-код</h4>
-    <input type="text" id="linkInput" class="form-control mb-3 w-75 mx-auto" 
-           placeholder="https://example.com" 
-           oninput="GetQRcode()"
-           autocomplete="off">
-
-    <h5 class="mb-2">Ваш QR-код</h5>
-    <div id="qrcode"></div>
-
+    <h4>Создайте QR-код за секунды</h4>
+    
+    <div class="input-group">
+        <input type="text" id="linkInput" class="form-control" 
+               placeholder="https://example.com или example.com" 
+               autocomplete="off">
+        <button class="btn btn-outline-secondary paste-btn" type="button" id="pasteBtn">
+            <i class="fas fa-paste"></i>
+        </button>
+    </div>
+    
+    <div id="qrcode" title="QR-код появится здесь"></div>
+    
     <div class="buttons-container">
-        <button class="action-btn download-btn" id="downloadBtn" onclick="downloadQRcode()" disabled>
+        <button class="action-btn download-btn" id="downloadBtn">
             <i class="fas fa-download"></i>
             Скачать QR
         </button>
-        <button class="action-btn copy-btn" id="copyBtn" onclick="handleCopyAction()" disabled>
+        <button class="action-btn share-btn" id="shareBtn">
             <i class="fas fa-copy"></i>
             <span id="copyBtnText">Копировать QR</span>
         </button>
     </div>
     
-    <div class="mobile-warning" id="mobileWarning">
-        <i class="fas fa-exclamation-triangle"></i>
-        На телефонах используйте "Скачать QR"
+    <div class="stats">
+        <div class="stat-item">
+            <div class="stat-number" id="qrCount">0</div>
+            <div class="stat-label">Создано</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" id="todayCount">0</div>
+            <div class="stat-label">Сегодня</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Бесплатно</div>
+        </div>
     </div>
-
+    
     <div class="footer">Сделано Алиевым Владимиром</div>
 </div>
 
-<!-- Уведомление -->
-<div class="alert-message" id="alert"></div>
-
 <script>
+    // Глобальные переменные
     let currentQRCode = null;
     let isMobile = false;
+    let qrGeneratedCount = 0;
+    let todayCount = 0;
+    let currentDate = new Date().toDateString();
     
-    // Определяем тип устройства при загрузке
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        initApp();
+    });
+    
+    function initApp() {
+        // Определяем тип устройства
+        checkDeviceType();
+        
+        // Загружаем статистику
+        loadStatistics();
+        
+        // Обновляем отображение статистики
+        updateStatsDisplay();
+        
+        // Фокус на поле ввода
+        const linkInput = document.getElementById('linkInput');
+        linkInput.focus();
+        
+        // Обработчик ввода ссылки
+        linkInput.addEventListener('input', function() {
+            GetQRcode();
+        });
+        
+        // Обработчик Enter для быстрой генерации
+        linkInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                GetQRcode();
+            }
+        });
+        
+        // Обработчик кнопки вставки
+        const pasteBtn = document.getElementById('pasteBtn');
+        pasteBtn.addEventListener('click', pasteFromClipboard);
+        
+        // Обработчик кнопки скачивания
+        const downloadBtn = document.getElementById('downloadBtn');
+        downloadBtn.addEventListener('click', downloadQRcode);
+        
+        // Обработчик кнопки копирования/шеринга
+        const shareBtn = document.getElementById('shareBtn');
+        shareBtn.addEventListener('click', handleCopyAction);
+        
+        // Проверяем поддержку буфера обмена
+        checkClipboardSupport();
+    }
+    
     function checkDeviceType() {
         isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // Меняем текст кнопки на мобильных
         if (isMobile) {
             document.getElementById('copyBtnText').textContent = 'Поделиться QR';
-            document.getElementById('mobileWarning').classList.add('show');
         }
     }
-
+    
+    function checkClipboardSupport() {
+        const pasteBtn = document.getElementById('pasteBtn');
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+            pasteBtn.style.display = 'none';
+        }
+    }
+    
+    function loadStatistics() {
+        // Загружаем общее количество
+        const savedCount = localStorage.getItem('qrGeneratedCount');
+        qrGeneratedCount = savedCount ? parseInt(savedCount) : 0;
+        
+        // Загружаем сегодняшнее количество
+        const lastVisitDate = localStorage.getItem('lastVisitDate');
+        const savedTodayCount = localStorage.getItem('todayCount');
+        
+        if (lastVisitDate === currentDate) {
+            todayCount = savedTodayCount ? parseInt(savedTodayCount) : 0;
+        } else {
+            todayCount = 0;
+            localStorage.setItem('lastVisitDate', currentDate);
+            localStorage.setItem('todayCount', '0');
+        }
+    }
+    
+    function updateStatsDisplay() {
+        document.getElementById('qrCount').textContent = qrGeneratedCount;
+        document.getElementById('todayCount').textContent = todayCount;
+    }
+    
+    function saveStatistics() {
+        localStorage.setItem('qrGeneratedCount', qrGeneratedCount.toString());
+        localStorage.setItem('todayCount', todayCount.toString());
+    }
+    
+    // Валидация URL
+    function isValidURL(string) {
+        if (!string) return false;
+        
+        // Простая проверка - должна быть хотя бы одна точка и нет пробелов
+        if (string.includes(' ')) return false;
+        
+        // Проверяем, есть ли точка (для domain.com) или протокол
+        if (string.includes('.') || string.startsWith('http://') || string.startsWith('https://')) {
+            return true;
+        }
+        
+        return false;
+    }
+    
     function GetQRcode() {
         let link = document.getElementById('linkInput').value.trim();
         let qrDiv = document.getElementById('qrcode');
         
-        // Получаем кнопки
         const downloadBtn = document.getElementById('downloadBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        
-        // Очистка предыдущего QR-кода
-        qrDiv.innerHTML = '';
+        const shareBtn = document.getElementById('shareBtn');
         
         // Сбрасываем состояние
+        qrDiv.innerHTML = '';
         downloadBtn.disabled = true;
-        copyBtn.disabled = true;
+        shareBtn.disabled = true;
         currentQRCode = null;
         
-        // Убираем фоновое изображение
-        qrDiv.style.backgroundImage = 'none';
-
-        if (link === '') {
-            // Пустое поле - показываем плейсхолдер
-            qrDiv.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="white"/><text x="100" y="100" font-family="Arial" font-size="14" fill="%23ccc" text-anchor="middle" dominant-baseline="middle">QR-код появится здесь</text></svg>\')';
+        // Проверяем пустой ввод
+        if (!link) {
+            showPlaceholder(qrDiv);
             return;
         }
-
-        // Добавляем https:// если нет протокола
+        
+        // Проверяем валидность URL
+        if (!isValidURL(link)) {
+            showError(qrDiv, 'Введите корректную ссылку');
+            showToast('Введите корректную ссылку (например: google.com)', 'warning');
+            return;
+        }
+        
+        // Добавляем протокол если нужно
         if (!link.startsWith('http://') && !link.startsWith('https://')) {
             link = 'https://' + link;
         }
         
-        // Создаем изображение QR-кода
-        let qr = document.createElement('img');
-        qr.id = 'qrImage';
+        // Показываем загрузку
+        showLoading(qrDiv);
         
-        // Генерируем URL для QR-кода
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}&format=png&margin=10`;
-        qr.src = qrUrl;
-        qr.alt = 'QR Code';
-        
-        qr.onload = function() {
-            // Активируем кнопки после загрузки изображения
-            downloadBtn.disabled = false;
-            copyBtn.disabled = false;
-            currentQRCode = qrUrl;
-            showAlert('QR-код успешно создан!');
-        };
-        
-        qr.onerror = function() {
-            qrDiv.innerHTML = '<div style="color: #dc3545; padding: 20px;">Ошибка создания QR-кода</div>';
-            showAlert('Не удалось создать QR-код. Проверьте ссылку.', 'error');
-        };
-        
-        qrDiv.appendChild(qr);
+        // Генерируем QR-код
+        generateQRCode(link, qrDiv, downloadBtn, shareBtn);
     }
-
+    
+    function showPlaceholder(qrDiv) {
+        qrDiv.innerHTML = `
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ccc;">
+                <div style="text-align: center;">
+                    <i class="fas fa-qrcode" style="font-size: 48px; margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-size: 14px;">Введите ссылку выше</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    function showError(qrDiv, message) {
+        qrDiv.innerHTML = `
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #dc3545;">
+                <div style="text-align: center;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-size: 14px;">${message}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    function showLoading(qrDiv) {
+        qrDiv.innerHTML = `
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    function generateQRCode(link, qrDiv, downloadBtn, shareBtn) {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(link)}&format=png&margin=10&qzone=1`;
+        
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = qrUrl;
+        
+        img.onload = function() {
+            qrDiv.innerHTML = '';
+            qrDiv.appendChild(img);
+            
+            // Активируем кнопки
+            downloadBtn.disabled = false;
+            shareBtn.disabled = false;
+            currentQRCode = qrUrl;
+            
+            // Обновляем статистику
+            qrGeneratedCount++;
+            todayCount++;
+            saveStatistics();
+            updateStatsDisplay();
+            
+            showToast('QR-код успешно создан!', 'success');
+        };
+        
+        img.onerror = function() {
+            showError(qrDiv, 'Ошибка создания QR-кода');
+            showToast('Не удалось создать QR-код. Проверьте интернет-соединение.', 'error');
+        };
+    }
+    
+    // Работа с буфером обмена
+    async function pasteFromClipboard() {
+        try {
+            if (!navigator.clipboard) {
+                showToast('Ваш браузер не поддерживает доступ к буферу обмена', 'warning');
+                return;
+            }
+            
+            const text = await navigator.clipboard.readText();
+            if (text) {
+                document.getElementById('linkInput').value = text;
+                GetQRcode();
+                showToast('Текст вставлен из буфера обмена', 'success');
+            }
+        } catch (err) {
+            console.error('Ошибка при вставке:', err);
+            showToast('Не удалось вставить из буфера обмена', 'error');
+        }
+    }
+    
+    // Скачивание QR-кода
     function downloadQRcode() {
         if (!currentQRCode) {
-            showAlert('Сначала создайте QR-код!', 'error');
+            showToast('Сначала создайте QR-код!', 'warning');
             return;
         }
-
+        
         try {
-            // Прямое скачивание
             const link = document.createElement('a');
             link.href = currentQRCode;
-            link.download = `qrcode-${Date.now()}.png`;
+            link.download = `qr-code-${Date.now()}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            showAlert('QR-код успешно скачан!');
+            showToast('QR-код скачан успешно!', 'success');
         } catch (error) {
             console.error('Ошибка скачивания:', error);
-            showAlert('Ошибка при скачивании QR-кода', 'error');
+            showToast('Ошибка при скачивании QR-кода', 'error');
         }
     }
-
-    // Умная обработка копирования/шеринга
+    
+    // Обработка копирования/шеринга
     function handleCopyAction() {
         if (!currentQRCode) {
-            showAlert('Сначала создайте QR-код!', 'error');
+            showToast('Сначала создайте QR-код!', 'warning');
             return;
         }
-
+        
         if (isMobile) {
-            // На мобильных показываем инструкцию
-            showAlert('На телефоне используйте "Скачать QR" или сделайте скриншот', 'warning');
-            
-            // Альтернатива: пытаемся использовать Web Share API
-            if (navigator.share) {
-                const link = document.getElementById('linkInput').value.trim();
-                navigator.share({
-                    title: 'Мой QR-код',
-                    text: 'Посмотрите мой QR-код',
-                    url: link
-                }).catch(err => {
-                    console.log('Ошибка шеринга:', err);
-                });
-            }
+            handleMobileShare();
         } else {
-            // На ПК пробуем скопировать
             copyQRToClipboard();
         }
     }
-
-    // Функция копирования QR-кода (только для ПК)
+    
+    // Копирование QR-кода (для ПК)
     async function copyQRToClipboard() {
-        if (!currentQRCode) return;
-
         try {
             const response = await fetch(currentQRCode);
-            const blob = await response.blob();
-            
-            // Показываем предупреждение для пользователя
-            if (!confirm('Копирование QR-кода работает только в современных браузерах на ПК. Продолжить?')) {
-                return;
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки изображения');
             }
             
-            if (navigator.clipboard && navigator.clipboard.write) {
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        'image/png': blob
-                    })
-                ]);
-                showAlert('QR-код скопирован в буфер обмена!');
-            } else {
+            const blob = await response.blob();
+            
+            // Проверяем поддержку Clipboard API
+            if (!navigator.clipboard || !navigator.clipboard.write) {
                 throw new Error('Clipboard API не поддерживается');
             }
             
+            await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+            ]);
+            
+            showToast('QR-код скопирован в буфер обмена!', 'success');
         } catch (error) {
             console.error('Ошибка копирования:', error);
-            showAlert('Не удалось скопировать. Лучше скачайте QR-код.', 'error');
-            
-            // Автоматически предлагаем скачать
-            setTimeout(() => {
-                if (confirm('Копирование не сработало. Скачать QR-код вместо этого?')) {
-                    downloadQRcode();
-                }
-            }, 500);
+            showToast('Не удалось скопировать. Используйте "Скачать QR"', 'error');
         }
     }
-
-    // Функция для показа сообщений
-    function showAlert(message, type = 'success') {
-        const alert = document.getElementById('alert');
-        alert.textContent = message;
-        alert.className = 'alert-message';
+    
+    // Шеринг на мобильных
+    function handleMobileShare() {
+        const link = document.getElementById('linkInput').value.trim();
         
-        if (type === 'error') {
-            alert.classList.add('error');
-        } else if (type === 'warning') {
-            alert.classList.add('warning');
+        if (navigator.share) {
+            navigator.share({
+                title: 'Мой QR-код',
+                text: 'Посмотрите созданный мной QR-код',
+                url: link
+            }).catch(err => {
+                console.log('Ошибка шеринга:', err);
+                showToast('Поделитесь скриншотом QR-кода', 'info');
+            });
+        } else {
+            showToast('На телефоне используйте "Скачать QR" или сделайте скриншот', 'info');
         }
+    }
+    
+    // Toast уведомления
+    function showToast(message, type = 'success') {
+        // Удаляем старые тосты
+        const oldToasts = document.querySelectorAll('.toast');
+        oldToasts.forEach(toast => {
+            toast.style.animation = 'toastSlideOut 0.3s ease';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        });
         
-        alert.style.display = 'block';
+        // Создаем новый тост
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
         
-        // Автоматически скрываем через 3 секунды
+        // Добавляем иконку в зависимости от типа
+        let icon = '✅';
+        if (type === 'error') icon = '❌';
+        if (type === 'warning') icon = '⚠️';
+        if (type === 'info') icon = 'ℹ️';
+        
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+        
+        document.body.appendChild(toast);
+        
+        // Автоматическое скрытие
         setTimeout(() => {
-            alert.style.display = 'none';
+            toast.style.animation = 'toastSlideOut 0.3s ease';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
         }, 3000);
     }
-
-    // Инициализация при загрузке
-    window.addEventListener('DOMContentLoaded', function() {
-        checkDeviceType(); // Определяем тип устройства
-        document.getElementById('linkInput').focus();
-        
-        // Добавляем обработчик клавиши Enter
-        document.getElementById('linkInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && currentQRCode) {
-                downloadQRcode();
-            }
-        });
-    });
 </script>
 
 </body>

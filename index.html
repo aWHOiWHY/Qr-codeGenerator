@@ -22,6 +22,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
         }
         
         .container {
@@ -35,6 +36,7 @@
             max-width: 450px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             animation: containerAppear 0.5s ease;
+            box-sizing: border-box;
         }
         
         @keyframes containerAppear {
@@ -54,11 +56,14 @@
             margin-bottom: 20px;
             background: linear-gradient(45deg, var(--primary), var(--success));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-fill-color: transparent;
         }
         
         .input-group {
             margin-bottom: 20px;
+            display: flex;
         }
         
         #linkInput {
@@ -68,6 +73,8 @@
             border: 2px solid #e0e0e0;
             border-right: none;
             transition: all 0.3s ease;
+            flex: 1;
+            box-sizing: border-box;
         }
         
         #linkInput:focus {
@@ -81,11 +88,21 @@
             border: 2px solid #e0e0e0;
             border-left: none;
             background: white;
+            padding: 0 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .paste-btn:hover {
             background: #f8f9fa;
             border-color: #ced4da;
+        }
+        
+        .paste-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         #qrcode {
@@ -101,6 +118,7 @@
             overflow: hidden;
             position: relative;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
         
         #qrcode:hover {
@@ -113,6 +131,7 @@
             max-width: 100%;
             max-height: 100%;
             animation: qrAppear 0.5s ease;
+            display: block;
         }
         
         @keyframes qrAppear {
@@ -150,6 +169,7 @@
             min-width: 160px;
             position: relative;
             overflow: hidden;
+            box-sizing: border-box;
         }
         
         .download-btn {
@@ -233,6 +253,7 @@
             align-items: center;
             gap: 10px;
             max-width: 300px;
+            box-sizing: border-box;
         }
         
         .toast.success {
@@ -278,6 +299,7 @@
         .spinner-border {
             width: 3rem;
             height: 3rem;
+            border-width: 0.25em;
         }
         
         .visually-hidden {
@@ -293,23 +315,38 @@
         }
         
         @media (max-width: 480px) {
-            .container {
-                padding: 20px;
+            body {
+                padding: 10px;
             }
+            
+            .container {
+                padding: 20px 15px;
+            }
+            
             .buttons-container {
                 flex-direction: column;
             }
+            
             .action-btn {
                 width: 100%;
                 min-width: auto;
+                padding: 12px 20px;
             }
+            
+            .stats {
+                justify-content: center;
+                gap: 40px;
+            }
+            
             .toast {
                 left: 20px;
                 right: 20px;
                 text-align: center;
                 justify-content: center;
                 max-width: none;
+                top: 10px;
             }
+            
             @keyframes toastSlideIn {
                 from {
                     transform: translateY(-100%);
@@ -320,6 +357,7 @@
                     opacity: 1;
                 }
             }
+            
             @keyframes toastSlideOut {
                 from {
                     transform: translateY(0);
@@ -341,20 +379,28 @@
     <div class="input-group">
         <input type="text" id="linkInput" class="form-control" 
                placeholder="https://example.com или example.com" 
-               autocomplete="off">
-        <button class="btn btn-outline-secondary paste-btn" type="button" id="pasteBtn">
+               autocomplete="off"
+               aria-label="Введите ссылку для генерации QR-кода">
+        <button class="btn btn-outline-secondary paste-btn" type="button" id="pasteBtn" aria-label="Вставить из буфера обмена">
             <i class="fas fa-paste"></i>
         </button>
     </div>
     
-    <div id="qrcode" title="QR-код появится здесь"></div>
+    <div id="qrcode" title="QR-код появится здесь" aria-live="polite">
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ccc; text-align: center;">
+            <div>
+                <i class="fas fa-qrcode" style="font-size: 48px; margin-bottom: 10px;"></i>
+                <p style="margin: 0; font-size: 14px;">Введите ссылку выше</p>
+            </div>
+        </div>
+    </div>
     
     <div class="buttons-container">
-        <button class="action-btn download-btn" id="downloadBtn">
+        <button class="action-btn download-btn" id="downloadBtn" aria-label="Скачать QR-код">
             <i class="fas fa-download"></i>
             Скачать QR
         </button>
-        <button class="action-btn share-btn" id="shareBtn">
+        <button class="action-btn share-btn" id="shareBtn" aria-label="Копировать или поделиться QR-кодом">
             <i class="fas fa-copy"></i>
             <span id="copyBtnText">Копировать QR</span>
         </button>
@@ -363,15 +409,11 @@
     <div class="stats">
         <div class="stat-item">
             <div class="stat-number" id="qrCount">0</div>
-            <div class="stat-label">Создано</div>
+            <div class="stat-label">Всего создано</div>
         </div>
         <div class="stat-item">
             <div class="stat-number" id="todayCount">0</div>
-            <div class="stat-label">Сегодня</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">∞</div>
-            <div class="stat-label">Бесплатно</div>
+            <div class="stat-label">Создано сегодня</div>
         </div>
     </div>
     
@@ -385,6 +427,7 @@
     let qrGeneratedCount = 0;
     let todayCount = 0;
     let currentDate = new Date().toDateString();
+    let isGenerating = false;
     
     // Инициализация при загрузке
     document.addEventListener('DOMContentLoaded', function() {
@@ -392,6 +435,8 @@
     });
     
     function initApp() {
+        console.log('Инициализация приложения...');
+        
         // Определяем тип устройства
         checkDeviceType();
         
@@ -403,16 +448,23 @@
         
         // Фокус на поле ввода
         const linkInput = document.getElementById('linkInput');
-        linkInput.focus();
+        setTimeout(() => {
+            linkInput.focus();
+        }, 100);
         
-        // Обработчик ввода ссылки
+        // Обработчик ввода ссылки с debounce
+        let inputTimeout;
         linkInput.addEventListener('input', function() {
-            GetQRcode();
+            clearTimeout(inputTimeout);
+            inputTimeout = setTimeout(() => {
+                GetQRcode();
+            }, 300);
         });
         
         // Обработчик Enter для быстрой генерации
         linkInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
+                clearTimeout(inputTimeout);
                 GetQRcode();
             }
         });
@@ -431,6 +483,8 @@
         
         // Проверяем поддержку буфера обмена
         checkClipboardSupport();
+        
+        console.log('Приложение инициализировано');
     }
     
     function checkDeviceType() {
@@ -438,30 +492,41 @@
         if (isMobile) {
             document.getElementById('copyBtnText').textContent = 'Поделиться QR';
         }
+        console.log('Тип устройства:', isMobile ? 'Мобильное' : 'ПК');
     }
     
     function checkClipboardSupport() {
         const pasteBtn = document.getElementById('pasteBtn');
         if (!navigator.clipboard || !navigator.clipboard.readText) {
-            pasteBtn.style.display = 'none';
+            pasteBtn.disabled = true;
+            pasteBtn.title = 'Ваш браузер не поддерживает эту функцию';
+            console.log('Буфер обмена не поддерживается');
         }
     }
     
     function loadStatistics() {
-        // Загружаем общее количество
-        const savedCount = localStorage.getItem('qrGeneratedCount');
-        qrGeneratedCount = savedCount ? parseInt(savedCount) : 0;
-        
-        // Загружаем сегодняшнее количество
-        const lastVisitDate = localStorage.getItem('lastVisitDate');
-        const savedTodayCount = localStorage.getItem('todayCount');
-        
-        if (lastVisitDate === currentDate) {
-            todayCount = savedTodayCount ? parseInt(savedTodayCount) : 0;
-        } else {
+        try {
+            // Загружаем общее количество
+            const savedCount = localStorage.getItem('qrGeneratedCount');
+            qrGeneratedCount = savedCount ? parseInt(savedCount) : 0;
+            
+            // Загружаем сегодняшнее количество
+            const lastVisitDate = localStorage.getItem('lastVisitDate');
+            const savedTodayCount = localStorage.getItem('todayCount');
+            
+            if (lastVisitDate === currentDate) {
+                todayCount = savedTodayCount ? parseInt(savedTodayCount) : 0;
+            } else {
+                todayCount = 0;
+                localStorage.setItem('lastVisitDate', currentDate);
+                localStorage.setItem('todayCount', '0');
+            }
+            
+            console.log('Статистика загружена:', { qrGeneratedCount, todayCount });
+        } catch (error) {
+            console.error('Ошибка загрузки статистики:', error);
+            qrGeneratedCount = 0;
             todayCount = 0;
-            localStorage.setItem('lastVisitDate', currentDate);
-            localStorage.setItem('todayCount', '0');
         }
     }
     
@@ -471,19 +536,35 @@
     }
     
     function saveStatistics() {
-        localStorage.setItem('qrGeneratedCount', qrGeneratedCount.toString());
-        localStorage.setItem('todayCount', todayCount.toString());
+        try {
+            localStorage.setItem('qrGeneratedCount', qrGeneratedCount.toString());
+            localStorage.setItem('todayCount', todayCount.toString());
+        } catch (error) {
+            console.error('Ошибка сохранения статистики:', error);
+        }
     }
     
     // Валидация URL
     function isValidURL(string) {
-        if (!string) return false;
+        if (!string || typeof string !== 'string') return false;
         
-        // Простая проверка - должна быть хотя бы одна точка и нет пробелов
-        if (string.includes(' ')) return false;
+        const trimmed = string.trim();
+        if (!trimmed) return false;
         
-        // Проверяем, есть ли точка (для domain.com) или протокол
-        if (string.includes('.') || string.startsWith('http://') || string.startsWith('https://')) {
+        // Проверка на пробелы
+        if (trimmed.includes(' ')) return false;
+        
+        // Проверка на наличие точки или протокола
+        if (trimmed.includes('.') || 
+            trimmed.startsWith('http://') || 
+            trimmed.startsWith('https://')) {
+            
+            // Проверяем, что после http:// или https:// что-то есть
+            if ((trimmed.startsWith('http://') && trimmed.length <= 7) ||
+                (trimmed.startsWith('https://') && trimmed.length <= 8)) {
+                return false;
+            }
+            
             return true;
         }
         
@@ -491,6 +572,8 @@
     }
     
     function GetQRcode() {
+        if (isGenerating) return;
+        
         let link = document.getElementById('linkInput').value.trim();
         let qrDiv = document.getElementById('qrcode');
         
@@ -517,21 +600,23 @@
         }
         
         // Добавляем протокол если нужно
-        if (!link.startsWith('http://') && !link.startsWith('https://')) {
-            link = 'https://' + link;
+        let processedLink = link;
+        if (!processedLink.startsWith('http://') && !processedLink.startsWith('https://')) {
+            processedLink = 'https://' + processedLink;
         }
         
         // Показываем загрузку
         showLoading(qrDiv);
         
         // Генерируем QR-код
-        generateQRCode(link, qrDiv, downloadBtn, shareBtn);
+        isGenerating = true;
+        generateQRCode(processedLink, qrDiv, downloadBtn, shareBtn);
     }
     
     function showPlaceholder(qrDiv) {
         qrDiv.innerHTML = `
-            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ccc;">
-                <div style="text-align: center;">
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ccc; text-align: center;">
+                <div>
                     <i class="fas fa-qrcode" style="font-size: 48px; margin-bottom: 10px;"></i>
                     <p style="margin: 0; font-size: 14px;">Введите ссылку выше</p>
                 </div>
@@ -541,8 +626,8 @@
     
     function showError(qrDiv, message) {
         qrDiv.innerHTML = `
-            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #dc3545;">
-                <div style="text-align: center;">
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #dc3545; text-align: center;">
+                <div>
                     <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 10px;"></i>
                     <p style="margin: 0; font-size: 14px;">${message}</p>
                 </div>
@@ -553,7 +638,7 @@
     function showLoading(qrDiv) {
         qrDiv.innerHTML = `
             <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                <div class="spinner-border text-primary" role="status">
+                <div class="spinner-border text-primary" role="status" aria-label="Загрузка QR-кода">
                     <span class="visually-hidden">Загрузка...</span>
                 </div>
             </div>
@@ -563,11 +648,15 @@
     function generateQRCode(link, qrDiv, downloadBtn, shareBtn) {
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(link)}&format=png&margin=10&qzone=1`;
         
+        console.log('Генерация QR-кода для:', link);
+        
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.src = qrUrl;
+        img.alt = `QR-код для ${link}`;
         
         img.onload = function() {
+            console.log('QR-код успешно загружен');
             qrDiv.innerHTML = '';
             qrDiv.appendChild(img);
             
@@ -583,12 +672,25 @@
             updateStatsDisplay();
             
             showToast('QR-код успешно создан!', 'success');
+            isGenerating = false;
         };
         
         img.onerror = function() {
+            console.error('Ошибка загрузки QR-кода');
             showError(qrDiv, 'Ошибка создания QR-кода');
             showToast('Не удалось создать QR-код. Проверьте интернет-соединение.', 'error');
+            isGenerating = false;
         };
+        
+        // Таймаут на случай, если изображение не загрузится
+        setTimeout(() => {
+            if (!img.complete && isGenerating) {
+                console.error('Таймаут загрузки QR-кода');
+                showError(qrDiv, 'Таймаут загрузки');
+                showToast('Загрузка заняла слишком много времени', 'error');
+                isGenerating = false;
+            }
+        }, 10000);
     }
     
     // Работа с буфером обмена
@@ -600,10 +702,12 @@
             }
             
             const text = await navigator.clipboard.readText();
-            if (text) {
+            if (text && text.trim()) {
                 document.getElementById('linkInput').value = text;
                 GetQRcode();
                 showToast('Текст вставлен из буфера обмена', 'success');
+            } else {
+                showToast('Буфер обмена пуст', 'warning');
             }
         } catch (err) {
             console.error('Ошибка при вставке:', err);
@@ -650,9 +754,11 @@
     // Копирование QR-кода (для ПК)
     async function copyQRToClipboard() {
         try {
+            console.log('Попытка копирования QR-кода...');
+            
             const response = await fetch(currentQRCode);
             if (!response.ok) {
-                throw new Error('Ошибка загрузки изображения');
+                throw new Error(`Ошибка HTTP: ${response.status}`);
             }
             
             const blob = await response.blob();
@@ -666,6 +772,7 @@
                 new ClipboardItem({ 'image/png': blob })
             ]);
             
+            console.log('QR-код успешно скопирован');
             showToast('QR-код скопирован в буфер обмена!', 'success');
         } catch (error) {
             console.error('Ошибка копирования:', error);
@@ -682,9 +789,10 @@
                 title: 'Мой QR-код',
                 text: 'Посмотрите созданный мной QR-код',
                 url: link
+            }).then(() => {
+                console.log('Успешный шеринг');
             }).catch(err => {
-                console.log('Ошибка шеринга:', err);
-                showToast('Поделитесь скриншотом QR-кода', 'info');
+                console.log('Пользователь отменил шеринг или ошибка:', err);
             });
         } else {
             showToast('На телефоне используйте "Скачать QR" или сделайте скриншот', 'info');
@@ -693,6 +801,8 @@
     
     // Toast уведомления
     function showToast(message, type = 'success') {
+        console.log(`Toast: ${type} - ${message}`);
+        
         // Удаляем старые тосты
         const oldToasts = document.querySelectorAll('.toast');
         oldToasts.forEach(toast => {
@@ -707,6 +817,8 @@
         // Создаем новый тост
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
         
         // Добавляем иконку в зависимости от типа
         let icon = '✅';
@@ -719,14 +831,19 @@
         document.body.appendChild(toast);
         
         // Автоматическое скрытие
-        setTimeout(() => {
+        const hideToast = () => {
             toast.style.animation = 'toastSlideOut 0.3s ease';
             setTimeout(() => {
                 if (toast.parentNode) {
                     toast.parentNode.removeChild(toast);
                 }
             }, 300);
-        }, 3000);
+        };
+        
+        setTimeout(hideToast, 3000);
+        
+        // Закрытие по клику
+        toast.addEventListener('click', hideToast);
     }
 </script>
 

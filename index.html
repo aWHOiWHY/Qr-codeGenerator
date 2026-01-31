@@ -184,15 +184,26 @@
             box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
         }
         
-        .share-btn {
+        .copy-btn {
             background: linear-gradient(135deg, var(--success), #157347);
             color: white;
         }
         
-        .share-btn:not(:disabled):hover {
+        .copy-btn:not(:disabled):hover {
             background: linear-gradient(135deg, #157347, #146c43);
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(25, 135, 84, 0.4);
+        }
+        
+        .share-site-btn {
+            background: linear-gradient(135deg, var(--info), #0aa2c0);
+            color: white;
+        }
+        
+        .share-site-btn:not(:disabled):hover {
+            background: linear-gradient(135deg, #0aa2c0, #098da8);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(13, 202, 240, 0.4);
         }
         
         .action-btn:disabled {
@@ -271,7 +282,7 @@
         }
         
         .toast.info {
-            background: var(--primary);
+            background: var(--info);
         }
         
         @keyframes toastSlideIn {
@@ -401,9 +412,13 @@
             <i class="fas fa-download"></i>
             Скачать QR
         </button>
-        <button class="action-btn share-btn" id="shareBtn" aria-label="Копировать QR-код или поделиться сайтом">
+        <button class="action-btn copy-btn" id="copyBtn" aria-label="Копировать QR-код">
             <i class="fas fa-copy"></i>
-            <span id="copyBtnText">Копировать QR</span>
+            Копировать QR
+        </button>
+        <button class="action-btn share-site-btn" id="shareSiteBtn" aria-label="Поделиться этим сайтом">
+            <i class="fas fa-share-alt"></i>
+            Поделиться сайтом
         </button>
     </div>
     
@@ -478,9 +493,13 @@
         const downloadBtn = document.getElementById('downloadBtn');
         downloadBtn.addEventListener('click', downloadQRcode);
         
-        // Обработчик кнопки копирования/шеринга
-        const shareBtn = document.getElementById('shareBtn');
-        shareBtn.addEventListener('click', handleCopyAction);
+        // Обработчик кнопки копирования QR-кода (только для ПК)
+        const copyBtn = document.getElementById('copyBtn');
+        copyBtn.addEventListener('click', copyQRToClipboard);
+        
+        // Обработчик кнопки "Поделиться сайтом" (всегда активна)
+        const shareSiteBtn = document.getElementById('shareSiteBtn');
+        shareSiteBtn.addEventListener('click', shareSite);
         
         // Проверяем поддержку буфера обмена
         checkClipboardSupport();
@@ -490,14 +509,14 @@
     
     function checkDeviceType() {
         isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile) {
-            // На мобильных меняем текст кнопки
-            document.getElementById('copyBtnText').textContent = 'Поделиться сайтом';
-            // Меняем иконку на иконку шеринга
-            const icon = document.querySelector('#shareBtn i');
-            icon.className = 'fas fa-share-alt';
-        }
         console.log('Тип устройства:', isMobile ? 'Мобильное' : 'ПК');
+        
+        // На мобильных устройствах скрываем кнопку "Копировать QR"
+        const copyBtn = document.getElementById('copyBtn');
+        if (isMobile) {
+            copyBtn.style.display = 'none';
+            console.log('Кнопка "Копировать QR" скрыта на мобильном устройстве');
+        }
     }
     
     function checkClipboardSupport() {
@@ -583,12 +602,17 @@
         let qrDiv = document.getElementById('qrcode');
         
         const downloadBtn = document.getElementById('downloadBtn');
-        const shareBtn = document.getElementById('shareBtn');
+        const copyBtn = document.getElementById('copyBtn');
         
         // Сбрасываем состояние
         qrDiv.innerHTML = '';
         downloadBtn.disabled = true;
-        shareBtn.disabled = true;
+        
+        // Только на ПК отключаем кнопку копирования
+        if (!isMobile) {
+            copyBtn.disabled = true;
+        }
+        
         currentQRCode = null;
         
         // Проверяем пустой ввод
@@ -615,7 +639,7 @@
         
         // Генерируем QR-код
         isGenerating = true;
-        generateQRCode(processedLink, qrDiv, downloadBtn, shareBtn);
+        generateQRCode(processedLink, qrDiv, downloadBtn, copyBtn);
     }
     
     function showPlaceholder(qrDiv) {
@@ -650,7 +674,7 @@
         `;
     }
     
-    function generateQRCode(link, qrDiv, downloadBtn, shareBtn) {
+    function generateQRCode(link, qrDiv, downloadBtn, copyBtn) {
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(link)}&format=png&margin=10&qzone=1`;
         
         console.log('Генерация QR-кода для:', link);
@@ -667,7 +691,12 @@
             
             // Активируем кнопки
             downloadBtn.disabled = false;
-            shareBtn.disabled = false;
+            
+            // Активируем кнопку копирования только на ПК
+            if (!isMobile) {
+                copyBtn.disabled = false;
+            }
+            
             currentQRCode = qrUrl;
             
             // Обновляем статистику
@@ -742,24 +771,13 @@
         }
     }
     
-    // Обработка копирования/шеринга
-    function handleCopyAction() {
+    // Копирование QR-кода (только для ПК)
+    async function copyQRToClipboard() {
         if (!currentQRCode) {
             showToast('Сначала создайте QR-код!', 'warning');
             return;
         }
         
-        if (isMobile) {
-            // На мобильных - поделиться ссылкой на сайт
-            shareSite();
-        } else {
-            // На ПК - копировать QR-код
-            copyQRToClipboard();
-        }
-    }
-    
-    // Копирование QR-кода (для ПК)
-    async function copyQRToClipboard() {
         try {
             console.log('Попытка копирования QR-кода...');
             
@@ -787,11 +805,13 @@
         }
     }
     
-    // Поделиться сайтом (для мобильных)
+    // Поделиться сайтом (всегда активна)
     function shareSite() {
         const siteUrl = window.location.href;
-        const shareText = 'Создавайте QR-коды бесплатно с помощью этого удобного генератора!';
+        const shareText = 'Создавайте QR-коды бесплатно с помощью этого удобного генератора! Попробуйте прямо сейчас!';
         const shareTitle = 'Генератор QR-кодов';
+        
+        console.log('Поделиться сайтом:', siteUrl);
         
         if (navigator.share) {
             // Используем Web Share API на мобильных

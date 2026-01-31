@@ -12,6 +12,7 @@
             --primary: #0d6efd;
             --success: #198754;
             --warning: #ffc107;
+            --info: #0dcaf0;
         }
         
         body {
@@ -400,7 +401,7 @@
             <i class="fas fa-download"></i>
             Скачать QR
         </button>
-        <button class="action-btn share-btn" id="shareBtn" aria-label="Копировать или поделиться QR-кодом">
+        <button class="action-btn share-btn" id="shareBtn" aria-label="Копировать QR-код или поделиться сайтом">
             <i class="fas fa-copy"></i>
             <span id="copyBtnText">Копировать QR</span>
         </button>
@@ -490,7 +491,11 @@
     function checkDeviceType() {
         isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
-            document.getElementById('copyBtnText').textContent = 'Поделиться QR';
+            // На мобильных меняем текст кнопки
+            document.getElementById('copyBtnText').textContent = 'Поделиться сайтом';
+            // Меняем иконку на иконку шеринга
+            const icon = document.querySelector('#shareBtn i');
+            icon.className = 'fas fa-share-alt';
         }
         console.log('Тип устройства:', isMobile ? 'Мобильное' : 'ПК');
     }
@@ -745,8 +750,10 @@
         }
         
         if (isMobile) {
-            handleMobileShare();
+            // На мобильных - поделиться ссылкой на сайт
+            shareSite();
         } else {
+            // На ПК - копировать QR-код
             copyQRToClipboard();
         }
     }
@@ -780,22 +787,55 @@
         }
     }
     
-    // Шеринг на мобильных
-    function handleMobileShare() {
-        const link = document.getElementById('linkInput').value.trim();
+    // Поделиться сайтом (для мобильных)
+    function shareSite() {
+        const siteUrl = window.location.href;
+        const shareText = 'Создавайте QR-коды бесплатно с помощью этого удобного генератора!';
+        const shareTitle = 'Генератор QR-кодов';
         
         if (navigator.share) {
+            // Используем Web Share API на мобильных
             navigator.share({
-                title: 'Мой QR-код',
-                text: 'Посмотрите созданный мной QR-код',
-                url: link
+                title: shareTitle,
+                text: shareText,
+                url: siteUrl
             }).then(() => {
-                console.log('Успешный шеринг');
+                console.log('Успешный шеринг сайта');
+                showToast('Спасибо за распространение!', 'success');
             }).catch(err => {
                 console.log('Пользователь отменил шеринг или ошибка:', err);
+                if (err.name !== 'AbortError') {
+                    // Если шеринг не сработал, пробуем скопировать ссылку
+                    copySiteLink(siteUrl, shareText);
+                }
             });
         } else {
-            showToast('На телефоне используйте "Скачать QR" или сделайте скриншот', 'info');
+            // Если Web Share API не поддерживается
+            copySiteLink(siteUrl, shareText);
+        }
+    }
+    
+    // Копирование ссылки на сайт
+    async function copySiteLink(siteUrl, shareText) {
+        try {
+            const textToCopy = `${shareText}\n${siteUrl}`;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(textToCopy);
+                showToast('Ссылка на сайт скопирована! Поделитесь ею с друзьями.', 'info');
+            } else {
+                // Старый способ для браузеров без Clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('Ссылка на сайт скопирована! Поделитесь ею с друзьями.', 'info');
+            }
+        } catch (error) {
+            console.error('Ошибка копирования ссылки:', error);
+            showToast('Ссылка на сайт: ' + siteUrl, 'info');
         }
     }
     

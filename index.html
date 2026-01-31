@@ -74,14 +74,23 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
         }
-        .share-btn {
+        .copy-btn {
             background: linear-gradient(135deg, #198754, #157347);
             color: white;
         }
-        .share-btn:not(:disabled):hover {
+        .copy-btn:not(:disabled):hover {
             background: linear-gradient(135deg, #157347, #146c43);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+        }
+        .share-btn {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+        }
+        .share-btn:not(:disabled):hover {
+            background: linear-gradient(135deg, #fd7e14, #e8590c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
         }
         .action-btn:disabled {
             background: #6c757d !important;
@@ -89,6 +98,15 @@
             cursor: not-allowed;
             transform: none !important;
             box-shadow: none !important;
+        }
+        .mobile-warning {
+            font-size: 12px;
+            color: #fd7e14;
+            margin-top: 5px;
+            display: none;
+        }
+        .mobile-warning.show {
+            display: block;
         }
         .footer {
             margin-top: 20px;
@@ -111,6 +129,9 @@
         .alert-message.error {
             background: #dc3545;
         }
+        .alert-message.warning {
+            background: #fd7e14;
+        }
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -129,6 +150,9 @@
                 min-width: 120px;
                 padding: 10px 15px;
                 font-size: 14px;
+            }
+            .buttons-container {
+                flex-direction: column;
             }
         }
     </style>
@@ -150,21 +174,37 @@
             <i class="fas fa-download"></i>
             Скачать QR
         </button>
-        <button class="action-btn share-btn" id="shareBtn" onclick="copyQRToClipboard()" disabled>
+        <button class="action-btn copy-btn" id="copyBtn" onclick="handleCopyAction()" disabled>
             <i class="fas fa-copy"></i>
-            Копировать QR
+            <span id="copyBtnText">Копировать QR</span>
         </button>
+    </div>
+    
+    <div class="mobile-warning" id="mobileWarning">
+        <i class="fas fa-exclamation-triangle"></i>
+        На телефонах используйте "Скачать QR"
     </div>
 
     <div class="footer">Сделано Алиевым Владимиром</div>
 </div>
 
-<!-- Простое уведомление -->
+<!-- Уведомление -->
 <div class="alert-message" id="alert"></div>
 
 <script>
     let currentQRCode = null;
-    let currentQRImage = null;
+    let isMobile = false;
+    
+    // Определяем тип устройства при загрузке
+    function checkDeviceType() {
+        isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Меняем текст кнопки на мобильных
+        if (isMobile) {
+            document.getElementById('copyBtnText').textContent = 'Поделиться QR';
+            document.getElementById('mobileWarning').classList.add('show');
+        }
+    }
 
     function GetQRcode() {
         let link = document.getElementById('linkInput').value.trim();
@@ -172,16 +212,15 @@
         
         // Получаем кнопки
         const downloadBtn = document.getElementById('downloadBtn');
-        const shareBtn = document.getElementById('shareBtn');
+        const copyBtn = document.getElementById('copyBtn');
         
         // Очистка предыдущего QR-кода
         qrDiv.innerHTML = '';
         
         // Сбрасываем состояние
         downloadBtn.disabled = true;
-        shareBtn.disabled = true;
+        copyBtn.disabled = true;
         currentQRCode = null;
-        currentQRImage = null;
         
         // Убираем фоновое изображение
         qrDiv.style.backgroundImage = 'none';
@@ -209,9 +248,8 @@
         qr.onload = function() {
             // Активируем кнопки после загрузки изображения
             downloadBtn.disabled = false;
-            shareBtn.disabled = false;
+            copyBtn.disabled = false;
             currentQRCode = qrUrl;
-            currentQRImage = qr.src;
             showAlert('QR-код успешно создан!');
         };
         
@@ -245,36 +283,68 @@
         }
     }
 
-    // Функция копирования QR-кода
-    async function copyQRToClipboard() {
+    // Умная обработка копирования/шеринга
+    function handleCopyAction() {
         if (!currentQRCode) {
             showAlert('Сначала создайте QR-код!', 'error');
             return;
         }
 
+        if (isMobile) {
+            // На мобильных показываем инструкцию
+            showAlert('На телефоне используйте "Скачать QR" или сделайте скриншот', 'warning');
+            
+            // Альтернатива: пытаемся использовать Web Share API
+            if (navigator.share) {
+                const link = document.getElementById('linkInput').value.trim();
+                navigator.share({
+                    title: 'Мой QR-код',
+                    text: 'Посмотрите мой QR-код',
+                    url: link
+                }).catch(err => {
+                    console.log('Ошибка шеринга:', err);
+                });
+            }
+        } else {
+            // На ПК пробуем скопировать
+            copyQRToClipboard();
+        }
+    }
+
+    // Функция копирования QR-кода (только для ПК)
+    async function copyQRToClipboard() {
+        if (!currentQRCode) return;
+
         try {
-            // Пытаемся скопировать как изображение
             const response = await fetch(currentQRCode);
             const blob = await response.blob();
             
-            // Проверяем поддержку Clipboard API
-            if (!navigator.clipboard || !navigator.clipboard.write) {
+            // Показываем предупреждение для пользователя
+            if (!confirm('Копирование QR-кода работает только в современных браузерах на ПК. Продолжить?')) {
+                return;
+            }
+            
+            if (navigator.clipboard && navigator.clipboard.write) {
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/png': blob
+                    })
+                ]);
+                showAlert('QR-код скопирован в буфер обмена!');
+            } else {
                 throw new Error('Clipboard API не поддерживается');
             }
             
-            await navigator.clipboard.write([
-                new ClipboardItem({
-                    'image/png': blob
-                })
-            ]);
-            
-            showAlert('QR-код скопирован в буфер обмена!');
-            
         } catch (error) {
             console.error('Ошибка копирования:', error);
+            showAlert('Не удалось скопировать. Лучше скачайте QR-код.', 'error');
             
-            // Альтернатива: предлагаем скачать
-            showAlert('Не удалось скопировать. Попробуйте скачать QR-код.', 'error');
+            // Автоматически предлагаем скачать
+            setTimeout(() => {
+                if (confirm('Копирование не сработало. Скачать QR-код вместо этого?')) {
+                    downloadQRcode();
+                }
+            }, 500);
         }
     }
 
@@ -286,6 +356,8 @@
         
         if (type === 'error') {
             alert.classList.add('error');
+        } else if (type === 'warning') {
+            alert.classList.add('warning');
         }
         
         alert.style.display = 'block';
@@ -296,8 +368,9 @@
         }, 3000);
     }
 
-    // Автоматически фокусируем поле ввода при загрузке
+    // Инициализация при загрузке
     window.addEventListener('DOMContentLoaded', function() {
+        checkDeviceType(); // Определяем тип устройства
         document.getElementById('linkInput').focus();
         
         // Добавляем обработчик клавиши Enter
